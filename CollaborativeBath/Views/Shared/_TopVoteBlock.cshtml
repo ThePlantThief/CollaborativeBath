@@ -1,0 +1,7 @@
+﻿@model CollaborativeBath.Models.VoteList
+<form onsubmit="return false;">
+    <div class="btn-group-vertical">
+        <button name="button" type="submit" class="btn btn-primary oi oi-arrow-thick-top" id="@string.Concat("vote_up",Model.Id)" onclick="submit_vote(@Model.Id,true);"> @Model.VoteUp</button>
+        <button name="button" type="submit" class="btn btn-secondary oi oi-arrow-thick-bottom" id="@string.Concat("vote_down",Model.Id)" onclick="submit_vote(@Model.Id,false);"> @Model.VoteDown</button>
+    </div>
+</form>

@@ -1,0 +1,48 @@
+﻿@using Microsoft.AspNet.Identity
+@model CollaborativeBath.ViewModels.UserDetailsViewModel
+@{
+    ViewBag.Title = "Manage";
+}
+<div class="container-fluid">
+    <div class="row align-items-center">
+        <div class="col-2">
+            <img src="@Url.Action("GetProfileImage", "Account", new {username = @Model.UserName})" class="img-fluid rounded-circle" />
+        </div>
+        <h2 class="col-10">
+            @Model.UserName
+        @if (Model.VoteSum > 0)
+            {
+        <span class="badge badge-primary badge-pill">@Model.VoteSum</span>
+            }
+            else
+            {
+        <span class="badge badge-secondary badge-pill">@Model.VoteSum</span>
+            }
+    </h2>
+</div>
+
+<div class="row" style="padding-bottom: 20px">
+    <div class="col" style="padding-bottom: 20px;">
+        <div class="card" style="padding: 0px">
+            <div class="card-header">Files</div>
+            <div class="list-group list-group-flush">
+                @foreach (var item in Model.Files.OrderByDescending(f => f.VoteList.VoteSum))
+                    {
+                <a href=@Url.Action("Details", "File", new {id = item.Id}) class="list-group-item list-group-item-action">
+                    @item.Title
+                    @if (item.VoteList.VoteSum > 0)
+                            {
+                    <span class="badge badge-primary badge-pill">@item.VoteList.VoteSum</span>
+                            }
+                            else
+                            {
+                    <span class="badge badge-secondary badge-pill">@item.VoteList.VoteSum</span>
+                            }
+                </a>
+
+                    }
+            </div>
+        </div>
+    </div>
+</div>
+</div>

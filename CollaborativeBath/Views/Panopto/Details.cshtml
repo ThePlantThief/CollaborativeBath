@@ -1,0 +1,73 @@
+﻿@using System.Diagnostics
+@using System.Diagnostics.Eventing.Reader
+@using CollaborativeBath.ViewModels
+@using CollaborativeBath.ViewModels.Base
+@using Microsoft.AspNet.Identity
+@model CollaborativeBath.ViewModels.PanoptoDetailsViewModel
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-auto">
+            @Html.Partial("_TopVoteBlock", Model.Panopto.VoteList, new ViewDataDictionary())
+        </div>
+        <div class="col">
+            <h2 class="d-flex align-items-center">@Model.Panopto.Title</h2>
+            <h6 class="text-muted align-items-center">Uploaded By
+                <a href=@Url.Action("Details","User", new {username = @Model.Panopto.Uploader.UserName})>@Model.Panopto.Uploader.UserName</a>
+                </h6>
+
+            @if (@Model.Panopto.Uploader.Id == User.Identity.GetUserId())
+            {
+                using (Html.BeginForm("Delete", "Panopto", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("id", @Model.Panopto.Id)
+                    <button type="submit" style="background-color: transparent; border: none" class="oi oi-trash" onclick="form.submit()"></button>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="row mb-4"></div>
+
+    <div class="row">
+        <div class="col">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"><a href=@Url.Action("Index","Folder")>Home</a></li>
+                @foreach (Breadcrumb crumb in Model.Breadcrumbs)
+                {
+                    <li class="breadcrumb-item active"><a href=@Url.Action("Details","Folder", new {id = crumb.Id})>@crumb.Title</a></li>
+                }
+            </ol>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 embed-responsive embed-responsive-16by9" id="videocontainer">
+            <video controls id="video">
+                <source src="@string.Concat(@"https://uniofbath.cloud.panopto.eu/Panopto/Podcast/Social/", Model.Panopto.PanoptoId,".mp4")" type="video/mp4">
+                Your browser does not support HTML5 video.
+            </video>
+        </div>
+        <div class="col-12">
+            @Html.Partial("_CommentList", new CommentListViewModel() {CommentListId = Model.Panopto.CommentList.Id, Comments = Model.Panopto.CommentList.Comments}, new ViewDataDictionary())
+            <p style="padding-top: 10px">Top tip: use "@@mm:ss" to add timestamps to your comments</p>
+        </div>
+    </div>
+</div>
+<script>
+    function setTime() {
+        var video = document.getElementById("video");
+        video.currentTime = arguments[0];
+    }
+
+    $(window).on('load', function () {
+        var video = $('#video');
+        if (video.prop('readyState') < 1 && video.prop('networkState') != 2){
+            //no automatically loading code
+            video.replaceWith('<div class="alert alert-danger">\r\n ' +
+                ' Video Unavailable! Please <a class="alert-link" href=\"https://uniofbath.cloud.panopto.eu\">login</a> to Panopto to view lectures.\r\n ' +
+                '</div>');
+            $('#videocontainer').attr('class', 'col-12');
+        }
+    });
+</script>

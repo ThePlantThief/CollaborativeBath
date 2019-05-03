@@ -1,0 +1,32 @@
+﻿@using CollaborativeBath.Models
+@using CollaborativeBath.ViewModels.Base
+@model CollaborativeBath.ViewModels.NewFolderViewModel
+
+@{
+    ViewBag.Title = "Add Folder";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col d-flex align-items-center">
+            <h2>Add Folder - @Model.Parent.Title</h2>
+        </div>
+    </div>
+
+    <div class="row mb-4"></div>
+
+    <div class="row">
+        <div class="col">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Parent.Id)
+                @Html.LabelFor(model => model.Title)
+                @Html.TextBoxFor(model => model.Title, new { @class = "form-control" })
+                @Html.LabelFor(model => model.Type)
+                @Html.DropDownListFor(model => model.Type, Model.TypeList, new { @class = "form-control" })
+                <input type="submit" value="Add" class="btn btn-primary" />
+            }
+        </div>
+    </div>
+</div>

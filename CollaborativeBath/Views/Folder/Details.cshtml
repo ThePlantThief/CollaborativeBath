@@ -1,0 +1,150 @@
+﻿@using CollaborativeBath.Models
+@using CollaborativeBath.ViewModels
+@using CollaborativeBath.ViewModels.Base
+@model FolderDetailsViewModel
+@{
+    ViewBag.Title = "Details";
+}
+<div class="container-fluid">
+    <div class="row" style="padding-bottom: 20px">
+        <div class="col-2">
+            @Html.Partial("_TopVoteBlock", Model.Folder.VoteList, new ViewDataDictionary())
+        </div>
+        <div class="col-10 col-md-8 d-flex align-items-center">
+            <h2>@Model.Folder.Title</h2>
+        </div>
+        <div class="col-2 d-flex align-items-center" style="padding-top: 20px">
+            <form onsubmit="return false;">
+                @if (!Model.Subscribed)
+                {
+                <button name="button" class="btn btn-primary" type="submit" onclick="subscribe(@Model.Folder.Id,true);" id="subbutton">Subscribe</button>
+                }
+                else
+                {
+                <button name="button" class="btn btn-primary" type="submit" onclick="subscribe(@Model.Folder.Id,false);" id="subbutton">Unsubscribe</button>
+                }
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"><a href=@Url.Action("Index")>Home</a></li>
+                @foreach (Breadcrumb crumb in Model.Breadcrumbs)
+                {
+                    <li class="breadcrumb-item active"><a href=@Url.Action("Details", new {id = crumb.Id})>@crumb.Title</a></li>
+                }
+            </ol>
+        </div>
+    </div>
+
+    <div class="row d-flex">
+        <div class="col-12 col-md-6 flex-fill" style="padding-bottom: 20px">
+            <div class="card" style="padding: 0px">
+                <div class="card-header">Folders</div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item" style="padding: 0px">
+                        <div class="d-flex btn-group">
+                            @Html.ActionLink("Add Folder", "Create", new { id = Model.Folder.Id }, new { @class = "btn btn-primary flex-fill" })
+                        </div>
+                    </div>
+                    @foreach (var item in Model.Folder.Childen.OrderByDescending(f => f.VoteList.VoteSum))
+                    {
+                        <a href=@Url.Action("Details", "Folder", new {id = item.Id}) class="list-group-item list-group-item-action">
+                            @item.Title
+                            @if (item.VoteList.VoteSum > 0)
+                            {
+                                <span class="badge badge-primary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary badge-pill"id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                        </a>
+
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <div class="card" style="padding: 0px">
+                <div class="card-header">Files</div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex btn-group" style="padding: 0px">
+                        @Html.ActionLink("Add Item", "Upload", "File", new { id = Model.Folder.Id }, new { @class = "btn btn-secondary btn-block" })
+                    </div>
+                    @foreach (var item in Model.Folder.Items.OrderByDescending(f => f.VoteList.VoteSum))
+                    {
+                        <a href=@Url.Action("Details", "File", new {id = item.Id}) class="list-group-item list-group-item-action">
+                            @item.Title
+                            @if (item.VoteList.VoteSum > 0)
+                            {
+                                <span class="badge badge-primary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                        </a>
+
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (true)
+        {
+            <div class="col-12 col-md-12" style="padding-top: 20px">
+                <div class="card" style="padding: 0px">
+                    <div class="card-header">Live Lectures</div>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex btn-group" style="padding: 0px">
+                            @Html.ActionLink("Add Lecture", "Create", "Panopto", new { id = Model.Folder.Id }, new { @class = "btn btn-secondary btn-block" })
+                        </div>
+                        @foreach (var item in Model.Folder.Panoptos.OrderByDescending(f => f.VoteList.VoteSum))
+                        {
+                            <a href=@Url.Action("Details", "Panopto", new {id = item.Id}) class="list-group-item list-group-item-action">
+                                @item.Title
+                                @if (item.VoteList.VoteSum > 0)
+                                {
+                                    <span class="badge badge-primary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                                }
+                            </a>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-12 col-md-12 flex-grow-1" style="padding-top: 20px">
+            @Html.Partial("_CommentList", new CommentListViewModel()
+            {
+                CommentListId = Model.Folder.CommentList.Id,
+                Comments = Model.Folder.CommentList.Comments
+            }, new ViewDataDictionary())
+        </div>
+    </div>
+</div>
+<script>
+    function subscribe(id, sub) {
+        axios.post('@Url.Action("Subscribe", "Folder", new {}, protocol: Request.Url.Scheme)', { id: id, sub: sub })
+            .then(function (response) {
+                console.log(response.data);
+                if (response.data == "subscribed") {
+                    $('#subbutton').html("Unsubscribe");
+                    $('#subbutton').attr('onclick','subscribe(@Model.Folder.Id,false);');
+                }
+                else if (response.data == "unsubscribed") {
+                    $('#subbutton').html("Subscribe");
+                    $('#subbutton').attr('onclick','subscribe(@Model.Folder.Id,true);');
+                }
+            });
+    }
+</script>

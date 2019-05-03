@@ -1,0 +1,104 @@
+﻿@using Microsoft.AspNet.Identity
+@if (Request.IsAuthenticated)
+{
+<style>
+    .scrolling-dropdown {
+        max-height: 250px;
+        overflow-y: scroll;
+    }
+</style>
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    {
+@Html.AntiForgeryToken()
+<ul class="mr-auto navbar-nav">
+    <li id="notification_tray" class="nav-item dropdown">
+        <a href="#" class="nav-link dropdown-toggle oi oi-bell" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><b id="note_count">0</b></a>
+        <div class="dropdown-menu scrolling-dropdown" aria-labelledby="dropdownMenuButton">
+            <div class="dropdown-item" v-on:mouseover="seen(note)" :id="'note' + note.Id" v-for="note in notifications" :key="note">
+                <a :class="{ 'text-muted': note.Seen}" :href="note.Href">
+                    {{note.Text}}
+                    <small class="text-muted">{{note.Time}}</small>
+                </a>
+                @*<a href="#" class="text-muted oi oi-x pull-right" v-on:click="delete(note);"></a>*@
+            </div>
+        </div>
+    </li>
+    <li class="nav-item">
+        @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Index", "Manage", routeValues: null,
+                    htmlAttributes: new { title = "Manage", @class = "nav-link" })
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+    </li>
+</ul>
+<script>
+            var pusher = new Pusher('e4d1d35525db3ed45a7f', {
+                cluster: 'eu',
+                forceTLS: true
+            });
+            var notification_channel = pusher.subscribe('@string.Concat("notifcation_channel_", User.Identity.GetUserId())');
+            var notificationVue = new Vue({
+                el: '#notification_tray',
+                data: {
+                    notifications: [],
+                },
+                created: function () {
+                    this.listen();
+                    this.get_notifications();
+                },
+                methods: {
+                    listen: function () {
+                        notification_channel.bind("new_note_event",
+                            (data) => {
+                                this.notifications.unshift(data);
+                                this.update_bell();
+                            });
+                    },
+                    get_notifications: function () {
+                        console.log("getting notifications");
+                        axios.get('@Url.Action("GetNotifications", "Notification", new {}, protocol: Request.Url.Scheme)')
+                            .then((response) => {
+                                this.notifications = response.data;
+                                this.update_bell();
+                            });
+                    },
+                    update_bell: function () {
+                        var newComments = 0;
+                        for (var i = 0; i < this.notifications.length; i++) {
+                            if (!this.notifications[i].Seen) {
+                                newComments++;
+                            }
+                        }
+                        $('#note_count').html(newComments.toString());
+                    },
+                    seen: function (e) {
+                        if (!e.Seen) {
+                            e.Seen = true;
+                            var postData = { noteId: e.Id };
+                            axios.post('@Url.Action("Seen", "Notification", new {}, protocol: Request.Url.Scheme)', postData);
+                            this.update_bell();
+                        }
+                    },
+                    delete: function (e) {
+                        console.log(e.Id);
+                        var postData = { noteId: e.Id };
+                        axios.post('@Url.Action("Delete", "Notification", new {}, protocol: Request.Url.Scheme)', postData);
+                        var self = this;
+                        $('#note' + e.Id).slideUp(500, function () {
+                            self.notifications = self.notifications.filter(function (c) {
+                                return c.Id != e.Id;
+                            });
+                        });
+                    }
+                }
+            });
+</script>
+    }
+}
+else
+{
+<ul class="nav navbar-nav navbar-right">
+    <li class="nav-item">@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "nav-link" })</li>
+    <li class="nav-item">@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })</li>
+</ul>
+}

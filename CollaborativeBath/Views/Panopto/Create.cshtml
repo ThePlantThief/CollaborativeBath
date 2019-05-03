@@ -1,0 +1,25 @@
+﻿@using System.Diagnostics
+@using System.Diagnostics.Eventing.Reader
+@model CollaborativeBath.ViewModels.PanoptoUploadViewModel
+<div class="container-fluid">
+    <div class="row">
+        <h2 class="col d-flex align-items-center">Upload</h2>
+    </div>
+
+    <div class="row mb-4"></div>
+
+    <div class="row">
+        <div class="col">
+            @using (Html.BeginForm("Create", "Panopto", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.ParentId)
+                @Html.LabelFor(model => model.Title)
+                @Html.TextBoxFor(model => model.Title, new { @class = "form-control " })
+                @Html.LabelFor(model => model.PanoptoId)
+                @Html.TextBoxFor(model => model.PanoptoId, new { @class = "form-control " })
+                <button type="submit" class="btn btn-primary">Submit</button>
+            }
+        </div>
+    </div>
+</div>

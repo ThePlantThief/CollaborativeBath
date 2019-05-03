@@ -1,0 +1,164 @@
+﻿@using System.Text.RegularExpressions
+@using Microsoft.AspNet.Identity
+@model CollaborativeBath.ViewModels.Base.CommentListViewModel
+<div class="card" id="comment_area">
+    <div class="card-header">
+        Comments
+    </div>
+    <div class="card-body" style="padding: 0px">
+        <transition-group class="list-group list-group-flush" name="comment-list" tag="ul">
+            <span class="list-group-item" :id="'comment' + com.Id" v-for="com in comments" :key="com">
+                <div class="row d-flex flex-row">
+                    <form onsubmit="return false;" class="col-3 col-md-1 flex-lg-shrink-1 center">
+                        <div class="btn-group-sm btn-group-vertical d-flex" role="group">
+                            <button name="button" type="submit" class="w-100 btn btn-primary oi oi-arrow-thick-top" :id="'vote_up' + com.VoteId" :onclick="'submit_vote(' + com.VoteId + ',true);'">{{com.VoteUp}}</button>
+                            <button name="button" type="submit" class="w-100 btn btn-secondary oi oi-arrow-thick-bottom" :id="'vote_down' + com.VoteId" :onclick="'submit_vote(' + com.VoteId + ',false);'">{{com.VoteDown}}</button>
+                        </div>
+                    </form>
+
+                    <div class="col-2 col-md-1 flex-lg-shrink-1" style="padding-right: 10px; padding-left: 0">
+                        <img :src="'/Account/GetProfileImage?username=' + com.UserName" class="img-fluid rounded-circle" />
+                    </div>
+                    <div class="col-7 col-md-10 flex-grow-1" style="padding: 0px">
+                        <header>
+                            <form onsubmit="return false;">
+                                <input id="id" name="id" type="hidden" :value="com.Id">
+                                <a :href="'/User/Details?username=' + com.UserName">
+                                    <strong>{{com.UserName}}</strong>
+                                </a>
+                                <small class="text-muted text-right">{{com.Time}}</small>
+                                <span v-html="com.Delete"></span>
+                            </form>
+                        </header>
+                        <span v-html="com.Body"></span>
+                    </div>
+                </div>
+            </span>
+        </transition-group>
+    </div>
+    <div class="card-footer" style="padding: 0px">
+        <form onsubmit="return false;">
+            @Html.AntiForgeryToken()
+            <div class="input-group">
+                <textarea class="form-control" v-model="comment.Body"></textarea>
+                <div class="input-group-append">
+                    <input value="Add Comment" type="submit" v-on:click="submit_comment()" class="input-group-text btn" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .comment-list-enter-active,
+    .comment-list-move {
+        transition: 1000ms cubic-bezier(0.59, 0.12, 0.34, 0.95);
+        transition-property: opacity, transform;
+    }
+
+    .comment-list-enter {
+        opacity: 0;
+        transform: translateX(50px) scaleY(0.5);
+    }
+
+    .comment-list-enter-to {
+        opacity: 1;
+        transform: translateX(0) scaleY(1);
+    }
+
+    .comment-list-leave-active {
+        position: absolute;
+        transition: 1000ms
+    }
+</style>
+<script>
+    var pusher = new Pusher('e4d1d35525db3ed45a7f', {
+        cluster: 'eu',
+        forceTLS: true
+    });
+    var comment_channel = pusher.subscribe('comment_channel');
+    var vote_channel = pusher.subscribe('vote_channel');
+    var commentVue = new Vue({
+        el: '#comment_area',
+        data: {
+            comments: [],
+            comment: {
+                VoteUp: 0,
+                VoteDown: 0,
+                UserName: '',
+                Id: 0, //Comment Id
+                Body: '',
+                Time: '',
+                Delete: '',
+                CommentListId: @Model.CommentListId,
+                VoteId : 0,
+            }
+        },
+        created: function() {
+            this.get_comments();
+            this.listen();
+        },
+        methods: {
+            get_comments: function () {
+                axios.get('@Url.Action("GetComments", "Comment", new { id = @Model.CommentListId }, protocol: Request.Url.Scheme)')
+                    .then((response) => {
+                        this.comments = response.data;
+                    });
+            },
+            listen: function() {
+                comment_channel.bind("new_comment_event",
+                    (data) => {
+                        if (data.CommentListId == @Model.CommentListId) {
+                            if (data.UserName == "@User.Identity.GetUserName()") {
+                                data.Delete = "<button type=\"submit\" style=\"background-color: transparent;" +
+                                    "border: none\" class=\"oi oi-trash\" onclick=\"delete_comment(" +
+                                    data.Id +
+                                    ")\"></button>";
+                            } else {
+                                data.Delete = "";
+                            }
+                            this.comments.push(data);
+                            this.comments.sort(function(b, a) {
+                                return a.VoteUp - a.VoteDown - (b.VoteUp - b.VoteDown);
+                            });
+                        }
+
+                    });
+                comment_channel.bind("delete_comment_event",
+                    (id) => {
+                        var self = this;
+                        $('#comment' + id).slideUp(500, function () {
+                            //$(this).remove();
+                            self.comments = self.comments.filter(function (c) {
+                                return c.Id != id;
+                            });
+                        });
+                    });
+                comment_channel.bind("vote_update",
+                    (data) => {
+                        for (i = 0; i < this.comments.length; i++) {
+                            if (this.comments[i].Id == data.Id) {
+                                this.comments[i].VoteUp = data.VoteUp;
+                                this.comments[i].VoteDown = data.VoteDown;
+                                this.comments.sort(function(b, a) {
+                                    return a.VoteUp - a.VoteDown - (b.VoteUp - b.VoteDown);
+                                });
+                                return;
+                            }
+                        }
+                    });
+            },
+            submit_comment: function() {
+                axios.post('@Url.Action("Create", "Comment", new {}, protocol: Request.Url.Scheme)', this.comment)
+                    .then((response) => {
+                        this.comment.Body = '';
+                    });
+            },
+        }
+    });
+
+    function delete_comment(id) {
+        var comment = { commentId: id };
+        axios.post('@Url.Action("Delete", "Comment", new {}, protocol: Request.Url.Scheme)', comment);
+    }
+</script>

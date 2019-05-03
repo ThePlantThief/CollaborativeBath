@@ -1,0 +1,93 @@
+﻿@using CollaborativeBath.Models
+@using CollaborativeBath.ViewModels
+@using CollaborativeBath.ViewModels.Base
+@model TopLayerViewModel
+@{
+    ViewBag.Title = "Details";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col d-flex align-items-center">
+            <h2>@Model.Folder.Title</h2>
+        </div>
+    </div>
+
+    <div class="row mb-4"></div>
+
+    <div class="row d-flex">
+
+        <div class="col-12 col-md-6" style="padding-bottom: 20px">
+            <div class="card" style="padding: 0px">
+                <div class="card-header">Subscribed Folders</div>
+                <div class="list-group list-group-flush">
+                    @foreach (var item in Model.SubscribedFolders)
+                    {
+                        <a href=@Url.Action("Details", "Folder", new {id = item.Id}) class="list-group-item list-group-item-action">
+                            @item.Title
+                            @if (item.VoteList.VoteSum > 0)
+                            {
+                                <span class="badge badge-primary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                        </a>
+
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6" style="padding-bottom: 20px">
+            <div class="card" style="padding: 0px">
+                <div class="card-header">Top Users</div>
+                <div class="list-group list-group-flush">
+                    @foreach (var item in Model.Leaderboard)
+                    {
+                        <a href=@Url.Action("Details", "User", new {username = item.User.UserName}) class="list-group-item list-group-item-action">
+                            @item.User.UserName
+                            @if (item.Votes > 0)
+                            {
+                                <span class="badge badge-primary badge-pill" >@item.Votes</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary badge-pill">@item.Votes</span>
+                            }
+                        </a>
+
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-12 flex-fill" style="padding-bottom: 20px">
+            <div class="card" style="padding: 0px">
+                <div class="card-header">Folders</div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item" style="padding: 0px">
+                        <div class="d-flex btn-group">
+                            @Html.ActionLink("Add Folder", "Create", new { id = Model.Folder.Id }, new { @class = "btn btn-primary flex-fill" })
+                        </div>
+                    </div>
+                    @foreach (var item in Model.Folder.Childen.OrderByDescending(f => f.VoteList.VoteSum))
+                    {
+                        <a href=@Url.Action("Details", "Folder", new {id = item.Id}) class="list-group-item list-group-item-action">
+                            @item.Title
+                            @if (item.VoteList.VoteSum > 0)
+                            {
+                                <span class="badge badge-primary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary badge-pill" id="@string.Concat("vote_sum",item.VoteList.Id)">@item.VoteList.VoteSum</span>
+                            }
+                        </a>
+
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

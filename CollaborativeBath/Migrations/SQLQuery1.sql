@@ -1,0 +1,15 @@
+﻿DROP TABLE __MigrationHistory
+DROP TABLE AspNetRoles
+DROP TABLE AspNetUserClaims
+DROP TABLE AspNetUserLogins
+DROP TABLE AspNetUserRoles
+DROP TABLE AspNetUsers
+DROP TABLE CommentLists
+DROP TABLE Comments
+DROP TABLE Files
+DROP TABLE FolderApplicationUsers
+DROP TABLE Folders
+DROP TABLE Notifications
+DROP TABLE Panoptoes
+DROP TABLE VoteLists
+DROP TABLE Votes

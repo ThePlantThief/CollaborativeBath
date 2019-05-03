@@ -1,0 +1,141 @@
+﻿@using System.Diagnostics
+@using System.Diagnostics.Eventing.Reader
+@using CollaborativeBath.ViewModels
+@using CollaborativeBath.ViewModels.Base
+@using Microsoft.AspNet.Identity
+@model CollaborativeBath.ViewModels.FileDetailsViewModel
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-auto">
+            @Html.Partial("_TopVoteBlock", Model.File.VoteList, new ViewDataDictionary())
+        </div>
+        <div class="col">
+            <h2 class="d-flex align-items-center">@Model.File.Title</h2>
+            <h6 class="text-muted align-items-center">
+                Uploaded By
+                <a href=@Url.Action("Details","User", new {username = @Model.File.User.UserName})>@Model.File.User.UserName</a>
+            </h6>
+
+            @if (@Model.File.User.Id == User.Identity.GetUserId())
+            {
+                using (Html.BeginForm("Delete", "File", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("id", @Model.File.Id)
+                    <button type="submit" style="background-color: transparent; border: none" class="oi oi-trash" onclick="form.submit()"></button>
+                    <a href="@Url.Action("Reupload","File", new { id = Model.File.Id})">Reupload</a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="row mb-4"></div>
+
+    <div class="row">
+
+        <div class="col">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"><a href=@Url.Action("Index", "Folder")>Home</a></li>
+                @foreach (Breadcrumb crumb in Model.Breadcrumbs)
+                {
+                    <li class="breadcrumb-item active"><a href=@Url.Action("Details", "Folder", new {id = crumb.Id})>@crumb.Title</a></li>
+                }
+            </ol>
+        </div>
+    </div>
+    <div id="document_area">
+    <div class="row">
+        <div v-on:click="prev_file()" class="col-2 btn-secondary d-md-none">
+            <span class="oi oi-chevron-left"></span>
+        </div>
+        <div class="col" style="text-align: center"><strong id="version_label">Version: </strong><strong id="total_label"></strong></div>
+        <div v-on:click="next_file()" class="col-2 btn-secondary d-md-none">
+            <span class="oi oi-chevron-right"></span>
+        </div>
+    </div>
+        <div class="row">
+            <div  v-on:click="prev_file()" class="col-1 btn-secondary d-none d-md-block">
+                <span class="oi oi-chevron-left" style="top: 50%; "></span>
+            </div>
+            <div id="doc_container" class="col col-md-10 embed-responsive embed-responsive-4by3">
+                @if (!HttpContext.Current.IsDebuggingEnabled)
+                {
+                    <iframe id="docframe @Model.File.Id" class="embed-responsive-item" src=@string.Concat("https://docs.google.com/viewer?url=", @Url.Action("GetFile", "File", new {id = Model.File.Id}, Request.Url.Scheme), "&embedded=true")></iframe>
+                }
+                @if (HttpContext.Current.IsDebuggingEnabled)
+                {
+                    <iframe id="docframe0" class="embed-responsive-item" src=@string.Concat("https://docs.google.com/viewer?url=", @"https://collaborativebath.azurewebsites.net" + @Url.Action("GetFile", new {id = Model.File.Id}), "&embedded=true")></iframe>
+                }
+            </div>
+            <div v-on:click="next_file()" class="col-1 btn-secondary d-none d-md-block">
+                <span class="oi oi-chevron-right" style="top: 50%;"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            @Html.Partial("_CommentList", new CommentListViewModel() { CommentListId = Model.File.CommentList.Id, Comments = Model.File.CommentList.Comments }, new ViewDataDictionary())
+        </div>
+    </div>
+</div>
+<script>
+    var history = [];
+    var commentVue = new Vue({
+        el: '#document_area',
+        data: {
+            history: [],
+            index: 0
+        },
+        created: function() {
+            this.get_history();
+        },
+        methods: {
+            get_history: function () {
+                axios.get('@Url.Action("GetHistory", "File", new { id = @Model.File.Id }, protocol: Request.Url.Scheme)')
+                    .then((response) => {
+                        this.history = response.data;
+                        console.log(this.history);
+                        $('#version_label').text("Version: " + (this.history.length - this.index));
+                        $('#total_label').text("/" + this.history.length);
+                    });
+            },
+            next_file: function() {
+                console.log("Next");
+                if (this.index > 0) {
+                    var oldIndex = this.index;
+                    $('#docframe' + oldIndex).animate({ marginRight: "100%", width: "0%" }, 350);
+                    this.index--;
+                    $('#docframe' + this.index).animate({ marginLeft: "0%", width: "100%" }, 350);
+                    $('#version_label').text('Version: ' + (this.history.length - this.index));
+                }
+            },
+            prev_file: function() {
+                console.log("Prev: " + this.index + ":" + this.history.length);
+                if (this.index < this.history.length - 1) {
+                    console.log("Length:  " + $('#docframe' + this.index).length);
+                    if ($('#docframe' + (this.index+1)).length == 0) {
+                        console.log("Creating docframe" + this.index);
+
+                        var url =
+                            'https://docs.google.com/viewer?url=https://collaborativebath.azurewebsites.net/File/GetFile/' +
+                            this.history[(this.index + 1)] +
+                                '&embedded=true';
+                        var iframe = '<iframe id="docframe' +
+                            (this.index + 1) +
+                            '" class="embed-responsive-item" src="' +
+                            url +
+                            '" style="width: 0%, marginRight: 100%")>Document</iframe>';
+
+                        $('#doc_container').append(iframe);
+                    }
+
+                    var oldIndex = this.index;
+                    $('#docframe' + oldIndex).animate({ marginLeft: "100%", width: "0%" }, 350);
+                    this.index++;
+                    $('#docframe' + this.index).animate({ marginRight: "0%", width: "100%" }, 350);
+                    $('#version_label').text('Version: ' + (this.history.length- this.index));
+                }
+            }
+        }
+    });
+</script>
