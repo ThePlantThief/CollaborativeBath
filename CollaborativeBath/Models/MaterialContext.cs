@@ -3,26 +3,78 @@ using System.Data.Entity;
 
 namespace CollaborativeBath.Models
 {
+    /// <summary>
+    /// DbContext for the CollaborativeBath DB.
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNet.Identity.EntityFramework.IdentityDbContext{CollaborativeBath.Models.ApplicationUser}" />
     public class MaterialContext : IdentityDbContext<ApplicationUser>
     {
+        /// <summary>
+        /// Gets or sets the comments table.
+        /// </summary>
+        /// <value>
+        /// The comments.
+        /// </value>
         public DbSet<Comment> Comments { get; set; }
 
+        /// <summary>
+        /// Gets or sets the votes table.
+        /// </summary>
+        /// <value>
+        /// The votes.
+        /// </value>
         public DbSet<Vote> Votes { get; set; }
 
+        /// <summary>
+        /// Gets or sets the vote list table.
+        /// </summary>
+        /// <value>
+        /// The vote list.
+        /// </value>
         public DbSet<VoteList> VoteList { get; set; }
 
+        /// <summary>
+        /// Gets or sets the comment list table.
+        /// </summary>
+        /// <value>
+        /// The comment list.
+        /// </value>
         public DbSet<CommentList> CommentList { get; set; }
 
+        /// <summary>
+        /// Gets or sets the folders table.
+        /// </summary>
+        /// <value>
+        /// The folders.
+        /// </value>
         public DbSet<Folder> Folders { get; set; }
 
+        /// <summary>
+        /// Gets or sets the files table.
+        /// </summary>
+        /// <value>
+        /// The files.
+        /// </value>
         public DbSet<File> Files { get; set; }
 
+        /// <summary>
+        /// Gets or sets the panoptos table.
+        /// </summary>
+        /// <value>
+        /// The panoptos.
+        /// </value>
         public DbSet<Panopto> Panoptos { get; set; }
 
+        /// <summary>
+        /// Gets or sets the notifications table.
+        /// </summary>
+        /// <value>
+        /// The notifications.
+        /// </value>
         public DbSet<Notification> Notifications { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MaterialContext"/> class.
+        /// Initializes a new instance of the <see cref="MaterialContext" /> class.
         /// </summary>
         public MaterialContext() : base("DbConnection")
         {
@@ -31,6 +83,10 @@ namespace CollaborativeBath.Models
             Configuration.LazyLoadingEnabled = false;
         }
 
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <returns></returns>
         public static MaterialContext Create()
         {
             return new MaterialContext();
@@ -54,7 +110,7 @@ namespace CollaborativeBath.Models
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Folder>().HasMany(f => f.Childen)
+            modelBuilder.Entity<Folder>().HasMany(f => f.Children)
                 .WithOptional()
                 .HasForeignKey(f => f.ParentId);
             modelBuilder.Entity<CommentList>().HasMany<ApplicationUser>(l => l.SubscribedUsers)

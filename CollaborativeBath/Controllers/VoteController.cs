@@ -8,10 +8,21 @@ using System.Web.Mvc;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the Vote Model. Handles modification and fetching of vote entities.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class VoteController : Controller
     {
         // GET: Create
+        /// <summary>
+        /// Creates/modifies a vote for the given VoteList for the 
+        /// requesting user.
+        /// </summary>
+        /// <param name="id">The identifier of the VoteList.</param>
+        /// <param name="up">True if Up Vote, else Down Vote.</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Create(int? id, bool? up)
         {
@@ -70,6 +81,12 @@ namespace CollaborativeBath.Controllers
             return Content("ok");
         }
 
+        /// <summary>
+        /// Gets the parent entity of the vote list and returns its
+        /// title.
+        /// </summary>
+        /// <param name="listId">The list identifier.</param>
+        /// <returns></returns>
         public static string GetParentTitle(int listId)
         {
             using (MaterialContext db = new MaterialContext())
@@ -107,6 +124,12 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns a RedirectToAction to the details page for the parent entity.
+        /// If no entity is found returns HttpNotFound.
+        /// </summary>
+        /// <param name="id">The list identifier.</param>
+        /// <returns></returns>
         public ActionResult ListDetails(int? id)
         {
             using (MaterialContext db = new MaterialContext())

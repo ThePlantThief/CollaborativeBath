@@ -8,10 +8,20 @@ using System.Web.Mvc;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the Panopto Model.
+    /// Handles the creation, modification and display of said model.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class PanoptoController : Controller
     {
-        // GET: Panopto
+        // GET: Panopto/Details
+        /// <summary>
+        /// Handles requests to /Panopto/Details.
+        /// </summary>
+        /// <param name="id">The identifier of the Panopto to view.</param>
+        /// <returns>The view of the Panopto</returns>
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -34,6 +44,12 @@ namespace CollaborativeBath.Controllers
             return View(new PanoptoDetailsViewModel(panopto, GetParents(panopto.Parent.Id)));
         }
 
+        //GET: Panopto/Create
+        /// <summary>
+        /// Returns a view for creating a Panopto
+        /// </summary>
+        /// <param name="id">The identifier of the desired parent folder.</param>
+        /// <returns></returns>
         public ActionResult Create(int? id)
         {
             if (id == null)
@@ -43,6 +59,12 @@ namespace CollaborativeBath.Controllers
             return View(new PanoptoUploadViewModel() { ParentId = id.Value, Title = "Panopto - " });
         }
 
+        //POST: Panopto/Create
+        /// <summary>
+        /// Creates a Panopto from the given model and adds it to the database.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -85,6 +107,13 @@ namespace CollaborativeBath.Controllers
             return RedirectToAction("Details", "Panopto", new { id = panopto.Id });
         }
 
+        //POST: Panopto/Delete
+        /// <summary>
+        /// Deletes the Panopto with the given identifier.
+        /// Redirects to the parent folder.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int? id)
@@ -114,6 +143,12 @@ namespace CollaborativeBath.Controllers
             return Redirect(Request.UrlReferrer.ToString());
         }
 
+        /// <summary>
+        /// Returns an array of the parent folders of the Panopto with given
+        /// identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         protected Breadcrumb[] GetParents(int? id)
         {
             List<Breadcrumb> parents = new List<Breadcrumb>();

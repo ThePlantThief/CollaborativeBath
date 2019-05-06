@@ -7,16 +7,35 @@ using System.Web.Mvc;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the ApplicationUser Model.
+    /// Handles requests to the details page and leaderboards.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class UserController : Controller
     {
+        /// <summary>
+        /// Struct to represent a user's vote count.
+        /// </summary>
         public struct UserVotes
         {
+            /// <summary>
+            /// The user
+            /// </summary>
             public ApplicationUser User;
+            /// <summary>
+            /// Their total votes
+            /// </summary>
             public int Votes;
         }
 
         // GET: Details
+        /// <summary>
+        /// Returns the view for /User/Details
+        /// </summary>
+        /// <param name="username">The username of the user to display.</param>
+        /// <returns></returns>
         public ActionResult Details(string username)
         {
             ApplicationUser user = null;
@@ -47,6 +66,10 @@ namespace CollaborativeBath.Controllers
         }
 
         //GET: Leaderboard
+        /// <summary>
+        /// Generates and returns a list of all users in decending vote order.
+        /// </summary>
+        /// <returns></returns>
         public static IList<UserVotes> Leaderboard()
         {
             IList<UserVotes> users = new List<UserVotes>();
@@ -61,6 +84,11 @@ namespace CollaborativeBath.Controllers
             return users;
         }
 
+        /// <summary>
+        /// Gets the given user vote count.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns></returns>
         private static int GetUserVotes(ApplicationUser user)
         {
             int totalVotes = 0;

@@ -11,3 +11,4 @@ DROP TABLE Folders
 DROP TABLE VoteLists
 DROP TABLE Votes
 DROP TABLE __MigrationHistory
+DROP TABLE Comm

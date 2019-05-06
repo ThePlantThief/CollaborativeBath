@@ -11,22 +11,90 @@ using System.Web.Mvc;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the Comment Model.
+    /// Handles creation, modification and deleting.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class CommentController : Controller
     {
+        /// <summary>
+        /// A simplified comment class to be used in Json returns.
+        /// </summary>
         public class JsonComment
         {
+            /// <summary>
+            /// Gets or sets the vote up.
+            /// </summary>
+            /// <value>
+            /// The vote up.
+            /// </value>
             public int VoteUp { get; set; }
+            /// <summary>
+            /// Gets or sets the vote down.
+            /// </summary>
+            /// <value>
+            /// The vote down.
+            /// </value>
             public int VoteDown { get; set; }
+            /// <summary>
+            /// Gets or sets the name of the user.
+            /// </summary>
+            /// <value>
+            /// The name of the user.
+            /// </value>
             public string UserName { get; set; }
+            /// <summary>
+            /// Gets or sets the identifier.
+            /// </summary>
+            /// <value>
+            /// The identifier.
+            /// </value>
             public int Id { get; set; }
+            /// <summary>
+            /// Gets or sets the body.
+            /// </summary>
+            /// <value>
+            /// The body.
+            /// </value>
             public string Body { get; set; }
+            /// <summary>
+            /// Gets or sets the time.
+            /// </summary>
+            /// <value>
+            /// The time.
+            /// </value>
             public string Time { get; set; }
+            /// <summary>
+            /// Gets or sets the delete.
+            /// </summary>
+            /// <value>
+            /// The delete.
+            /// </value>
             public string Delete { get; set; }
+            /// <summary>
+            /// Gets or sets the comment list identifier.
+            /// </summary>
+            /// <value>
+            /// The comment list identifier.
+            /// </value>
             public int CommentListId { get; set; }
+            /// <summary>
+            /// Gets or sets the vote list identifier.
+            /// </summary>
+            /// <value>
+            /// The vote identifier.
+            /// </value>
             public int VoteId { get; set; }
         }
 
+        /// <summary>
+        /// Returns a Json containing an array of all the comments contained
+        /// in the comment list with given identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         public ActionResult GetComments(int? id)
         {
             CommentList comments = null;
@@ -47,6 +115,12 @@ namespace CollaborativeBath.Controllers
             return Json(jsonComments.ToArray(), JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Creates the comment specified by the JsonComment and adds it to the database.
+        /// Pushes the new comment to users.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Create(JsonComment comment)
         {
@@ -88,6 +162,12 @@ namespace CollaborativeBath.Controllers
         }
 
         // GET: Comment
+        /// <summary>
+        /// Deletes the comment with specified identifier.
+        /// Pushes the deletion event to users.
+        /// </summary>
+        /// <param name="commentId">The comment identifier.</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Delete(int? commentId)
         {
@@ -113,6 +193,11 @@ namespace CollaborativeBath.Controllers
             return Content("deleted");
         }
 
+        /// <summary>
+        /// Formats the given text to include hyperlinks for timestamp tags.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <returns></returns>
         private string FormatText(string text)
         {
             string output = "<p>";
@@ -134,6 +219,11 @@ namespace CollaborativeBath.Controllers
             return output;
         }
 
+        /// <summary>
+        /// Converts the comment into a JsonComment.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
+        /// <returns></returns>
         private JsonComment ConvertComment(Comment comment)
         {
             return new JsonComment()
@@ -152,6 +242,11 @@ namespace CollaborativeBath.Controllers
             };
         }
 
+        /// <summary>
+        /// Gets the title of the parent item.
+        /// </summary>
+        /// <param name="listId">The list identifier.</param>
+        /// <returns></returns>
         public static string GetParentTitle(int listId)
         {
             using (MaterialContext db = new MaterialContext())
@@ -189,6 +284,12 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns a RedirectToAction to the details page of the comment list specified by
+        /// the identifier's parent item.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         public ActionResult ListDetails(int? id)
         {
             using (MaterialContext db = new MaterialContext())

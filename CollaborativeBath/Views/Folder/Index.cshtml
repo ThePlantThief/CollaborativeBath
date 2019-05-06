@@ -71,7 +71,7 @@
                             @Html.ActionLink("Add Folder", "Create", new { id = Model.Folder.Id }, new { @class = "btn btn-primary flex-fill" })
                         </div>
                     </div>
-                    @foreach (var item in Model.Folder.Childen.OrderByDescending(f => f.VoteList.VoteSum))
+                    @foreach (var item in Model.Folder.Children.OrderByDescending(f => f.VoteList.VoteSum))
                     {
                         <a href=@Url.Action("Details", "Folder", new {id = item.Id}) class="list-group-item list-group-item-action">
                             @item.Title

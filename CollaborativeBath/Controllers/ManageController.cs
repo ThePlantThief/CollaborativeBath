@@ -11,6 +11,10 @@ using System.Web.Mvc;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Scaffolding file provided by .Net MVC.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class ManageController : Controller
     {

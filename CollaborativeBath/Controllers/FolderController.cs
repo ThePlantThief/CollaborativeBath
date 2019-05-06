@@ -10,10 +10,19 @@ using System.Web.Mvc;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the Folder Model.
+    /// Handles creation, modification and display.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class FolderController : Controller
     {
         //GET: Index
+        /// <summary>
+        /// Returns a view displaying a list of Top-Level folders that do not have a parent folder.
+        /// </summary>
+        /// <returns></returns>
         public ActionResult Index()
         {
             var topLayer = new Folder();
@@ -24,7 +33,7 @@ namespace CollaborativeBath.Controllers
             ICollection<Folder> subFolders = new List<Folder>();
             using (MaterialContext db = new MaterialContext())
             {
-                topLayer.Childen = db.Folders.Where(f => f.Type == FolderType.Course).Include(f => f.VoteList.Votes)
+                topLayer.Children = db.Folders.Where(f => f.Type == FolderType.Course).Include(f => f.VoteList.Votes)
                     .ToList();
                 var userId = User.Identity.GetUserId();
                 var user = db.Users
@@ -38,6 +47,12 @@ namespace CollaborativeBath.Controllers
         }
 
         // GET: Details
+        /// <summary>
+        /// Returns a view that displays a list of sub-folders, files, panoptos contained within the folder
+        /// and the folders votes and comments.
+        /// </summary>
+        /// <param name="id">The folder identifier.</param>
+        /// <returns></returns>
         public ActionResult Details(int? id)
         {
             Folder folder = null;
@@ -46,7 +61,7 @@ namespace CollaborativeBath.Controllers
             {
                 folder = db.Folders
                     .Include(f => f.VoteList.Votes)
-                    .Include(f => f.Childen.Select(c => c.VoteList.Votes))
+                    .Include(f => f.Children.Select(c => c.VoteList.Votes))
                     .Include(f => f.Items.Select(c => c.VoteList.Votes))
                     .Include(f => f.Panoptos.Select(p => p.VoteList.Votes))
                     .Include(f => f.CommentList.Comments.Select(c => c.User))
@@ -69,11 +84,16 @@ namespace CollaborativeBath.Controllers
         }
 
         //Get: Create
+        /// <summary>
+        /// Returns a view to create a new folder.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         public ActionResult Create(int? id)
         {
             using (MaterialContext db = new MaterialContext())
             {
-                var parent = db.Folders.Include(f => f.Childen).FirstOrDefault(f => f.Id == id);
+                var parent = db.Folders.Include(f => f.Children).FirstOrDefault(f => f.Id == id);
                 if (id == -1 || parent != null)
                 {
                     if (id == -1)
@@ -104,6 +124,12 @@ namespace CollaborativeBath.Controllers
         }
 
         //POST: Create
+        /// <summary>
+        /// Creates a new folder from the specified model.
+        /// Redirects to the details page of the new folder.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(NewFolderViewModel model)
@@ -122,7 +148,7 @@ namespace CollaborativeBath.Controllers
                     if (model.Parent.Id != -1)
                     {
                         var parent = db.Folders.Find(model.Parent.Id);
-                        parent.Childen.Add(folder);
+                        parent.Children.Add(folder);
                     }
                     else
                     {
@@ -136,6 +162,13 @@ namespace CollaborativeBath.Controllers
             return RedirectToAction("Create", new { id = model.Parent.Id });
         }
 
+        /// <summary>
+        /// (Un)subscribes the requesting user to the folder with
+        /// specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="sub">if set to <c>true</c> subscribe, else unsubscribe.</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Subscribe(int id, bool sub)
         {
@@ -169,6 +202,12 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns an array of the parent folders of the folder with given
+        /// identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         protected Breadcrumb[] GetParents(int? id)
         {
             List<Breadcrumb> parents = new List<Breadcrumb>();

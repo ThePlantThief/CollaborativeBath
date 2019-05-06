@@ -10,10 +10,21 @@ using System.Web.Mvc;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the notifcation model.
+    /// Handles the creation, modification and display of notifcation.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     public class NotificationController : Controller
     {
         #region Public Methods
 
+        /// <summary>
+        /// Adds the given notification to the database and pushes it to the 
+        /// given user.
+        /// </summary>
+        /// <param name="notification">The notification.</param>
+        /// <param name="userId">The user identifier.</param>
         [NonAction]
         public static void AddNotification(Notification notification, string userId)
         {
@@ -30,6 +41,11 @@ namespace CollaborativeBath.Controllers
             new Task(() => pusher.TriggerAsync("notifcation_channel_" + userId, "new_note_event", jsonNotification).Wait()).Start();
         }
 
+        /// <summary>
+        /// Adds a new notification for all users subscribed to the parent item of the
+        /// given comment list.
+        /// </summary>
+        /// <param name="list">The list.</param>
         public static void NewComment(CommentList list)
         {
             using (MaterialContext db = new MaterialContext())
@@ -65,6 +81,11 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds a new notification for all users subscribed to the parent folder of the
+        /// new file.
+        /// </summary>
+        /// <param name="file">The file.</param>
         public static void NewFile(File file)
         {
             Folder folder = null;
@@ -92,6 +113,11 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds a new notification for all users subscribed to the parent folder of the
+        /// given new folder.
+        /// </summary>
+        /// <param name="folder">The folder.</param>
         public static void NewFolder(Folder folder)
         {
             Folder parent = null;
@@ -118,6 +144,11 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds a new notification for all users subscribed to the parent item of the
+        /// given vote list.
+        /// </summary>
+        /// <param name="list">The list.</param>
         public static void NewVote(VoteList list)
         {
             using (MaterialContext db = new MaterialContext())
@@ -153,6 +184,11 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds a new notification for all users subscribed to the old file version of the
+        /// new file.
+        /// </summary>
+        /// <param name="file">The file.</param>
         public static void UpdatedFile(File file)
         {
             Folder folder = null;
@@ -180,6 +216,11 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds a new notification for all users subscribed to the parent folder of the
+        /// new Panopto.
+        /// </summary>
+        /// <param name="panopto">The panopto.</param>
         public static void NewPanopto(Panopto panopto)
         {
             Folder folder = null;
@@ -207,6 +248,11 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes the specified notification.
+        /// </summary>
+        /// <param name="noteId">The notification identifier.</param>
+        /// <returns></returns>
         [HttpPost]
         public ContentResult Delete(int? noteId)
         {
@@ -224,6 +270,10 @@ namespace CollaborativeBath.Controllers
             return Content("ok");
         }
 
+        /// <summary>
+        /// Returns a Json of all notification for the requesting user.
+        /// </summary>
+        /// <returns></returns>
         public ActionResult GetNotifications()
         {
             ICollection<Notification> notifications = null;
@@ -254,6 +304,11 @@ namespace CollaborativeBath.Controllers
             return Json(new JsonNotification[] { }, JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Sets the seen field to true for the specified notification.
+        /// </summary>
+        /// <param name="noteId">The notification identifier.</param>
+        /// <returns></returns>
         [HttpPost]
         public ContentResult Seen(int? noteId)
         {
@@ -274,6 +329,11 @@ namespace CollaborativeBath.Controllers
 
         #region Private Methods
 
+        /// <summary>
+        /// Converts the notification into a JsonNotification.
+        /// </summary>
+        /// <param name="notification">The notification.</param>
+        /// <returns></returns>
         private static JsonNotification ConvertNotification(Notification notification)
         {
             return new JsonNotification()
@@ -290,14 +350,47 @@ namespace CollaborativeBath.Controllers
 
         #region Public Classes
 
+        /// <summary>
+        /// A simplified version of Notification for Json returns.
+        /// </summary>
         public class JsonNotification
         {
             #region Public Properties
 
+            /// <summary>
+            /// Gets or sets the href.
+            /// </summary>
+            /// <value>
+            /// The href.
+            /// </value>
             public string Href { get; set; }
+            /// <summary>
+            /// Gets or sets the identifier.
+            /// </summary>
+            /// <value>
+            /// The identifier.
+            /// </value>
             public int Id { get; set; }
+            /// <summary>
+            /// Gets or sets a value indicating whether this <see cref="JsonNotification"/> has been seen.
+            /// </summary>
+            /// <value>
+            ///   <c>true</c> if seen; otherwise, <c>false</c>.
+            /// </value>
             public bool Seen { get; set; }
+            /// <summary>
+            /// Gets or sets the text.
+            /// </summary>
+            /// <value>
+            /// The text.
+            /// </value>
             public string Text { get; set; }
+            /// <summary>
+            /// Gets or sets the time.
+            /// </summary>
+            /// <value>
+            /// The time.
+            /// </value>
             public string Time { get; set; }
 
             #endregion Public Properties

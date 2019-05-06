@@ -2,8 +2,17 @@
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the landing page area.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     public class HomeController : Controller
     {
+        /// <summary>
+        /// Return the landing page to no authenticated users. Else
+        /// redirects them to /Folder/Index
+        /// </summary>
+        /// <returns></returns>
         public ActionResult Index()
         {
             if (!Request.IsAuthenticated)
@@ -14,13 +23,6 @@ namespace CollaborativeBath.Controllers
             {
                 return RedirectToAction("Index", "Folder");
             }
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
         }
     }
 }

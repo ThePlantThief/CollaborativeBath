@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CollaborativeBath.Models
 {
+    /// <summary>
+    /// View models created by .Net MVC
+    /// </summary>
     public class ExternalLoginConfirmationViewModel
     {
         [Required]

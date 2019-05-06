@@ -15,10 +15,20 @@ using File = CollaborativeBath.Models.File;
 
 namespace CollaborativeBath.Controllers
 {
+    /// <summary>
+    /// Controller for the File Model.
+    /// Handles creation, modification and display.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     public class FileController : Controller
     {
         #region Public Methods
 
+        /// <summary>
+        /// Deletes the file with specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -51,6 +61,11 @@ namespace CollaborativeBath.Controllers
             return RedirectToAction("Details", "Folder", new { id = folderId });
         }
 
+        /// <summary>
+        /// Returns a view displaying the file with specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         [Authorize]
         public ActionResult Details(int? id)
         {
@@ -89,6 +104,11 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns the actual file (i.e. a pdf) with given identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         public FileContentResult GetFile(int? id)
         {
             if (id != null)
@@ -114,6 +134,12 @@ namespace CollaborativeBath.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns a Json of an array of identifiers of the previous version
+        /// of the file with specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         public ActionResult GetHistory(int? id)
         {
             IList<int> history = new List<int>();
@@ -134,6 +160,12 @@ namespace CollaborativeBath.Controllers
             return Json(history.ToArray(), JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Returns a view to re-upload a new version of the file
+        /// with specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         [Authorize]
         public ActionResult Reupload(int? id)
         {
@@ -156,6 +188,12 @@ namespace CollaborativeBath.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Creates a file from the given model and adds it to the database.
+        /// Migrates the comment list and vote list from the old file to this one.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -209,6 +247,12 @@ namespace CollaborativeBath.Controllers
             return RedirectToAction("Details", "File", new { id = newId });
         }
 
+        /// <summary>
+        /// Returns a view to upload a new file under the folder with
+        /// the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         [Authorize]
         public ActionResult Upload(int? id)
         {
@@ -220,6 +264,11 @@ namespace CollaborativeBath.Controllers
             return View(new FileUploadViewModel() { FolderId = id.Value });
         }
 
+        /// <summary>
+        /// Create and add a new file to the database based on the given model.
+        /// </summary>
+        /// <param name="fileUploadViewModel">The file upload view model.</param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -262,6 +311,12 @@ namespace CollaborativeBath.Controllers
 
         #region Protected Methods
 
+        /// <summary>
+        /// Returns an array of the parent folders of the file with given
+        /// identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         [Authorize]
         protected Breadcrumb[] GetParents(int? id)
         {
@@ -289,6 +344,10 @@ namespace CollaborativeBath.Controllers
 
         #region Private Methods
 
+        /// <summary>
+        /// Gets the cloud BLOB container. If one does not exist it is created.
+        /// </summary>
+        /// <returns></returns>
         private CloudBlobContainer GetCloudBlobContainer()
         {
             CloudStorageAccount storageAccount =
